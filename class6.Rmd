@@ -1,0 +1,60 @@
+Read the data stored in ads.csv
+```{r}
+# Read CSV into R
+OnlineAdsData <- read.csv("~/documents/hba2/data_science/class6/ads.csv", header = TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(OnlineAdsData)
+```
+
+Let's create a new variable age group (<18, 18 24, 25 34, 35 44, 45 54, 55 64, 65+). For that, first create a vector of the intervals (<18, 18 24, 25 34, 35 44, 45 54, 55 64, 65+), i.e. (-Inf,0,18,24,34,44,54,64,Inf)
+#Inf = Infinity
+
+```{r}
+intervals = c(-Inf,0,18,24,34,44,54,64,Inf)
+intervals
+```
+
+Create a new column age_group and initialize it to 0
+```{r}
+OnlineAdsData$age_group = 0
+head(OnlineAdsData)
+```
+
+Assign to each datat point, the appropriate age group
+```{r}
+OnlineAdsData$age_group <-cut(OnlineAdsData$Age, intervals)
+head(OnlineAdsData)
+```
+
+Transform Gender into a readable label (female, male)
+```{r}
+OnlineAdsData$Gender = factor(OnlineAdsData$Gender, levels = c(0,1), labels = c("Female", 'Male'))
+```
+
+Display Summary Statistics
+```{r}
+summary(OnlineAdsData)
+```
+
+Get the data with Age = 0 and look at the Gender
+
+```{r}
+DataWithAge0 <- which(OnlineAdsData$Age==0)
+SelectDataWithAge0 <- OnlineAdsData[DataWithAge0, ]
+summary(SelectDataWithAge0)
+```
+
+Conclusion:
+We need to remove the data entries (rows) where Age == 0.
+Once those entries are removed, we'll be able to successfully interpret the Impressions/Clicks for each Age cluster and Gender (although we don't know which gender is which (since we recieved a binary classification with no additional information (see line 31)))
+
+Side note (for line 45):
+Square brackets mean the number is inclusive but round brackets mean the number is exclusive.
+
+Extra:
+
+Create a histogram for the number of impressions
+```{r}
+hist(OnlineAdsData$Impressions, col='black')
+```
+

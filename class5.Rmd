@@ -1,0 +1,51 @@
+Question 1:
+
+Resource 1: [RDocumentation](https://www.rdocumentation.org/)
+Resource 2: [Codecademy](https://www.codecademy.com/learn/learn-r/modules/learn-r-introduction/cheatsheet)
+BONUS: [BookDown](https://bookdown.org/ndphillips/YaRrr/logical-indexing.html)
+
+Question 2:
+
+Runif generates random compositions with a uniform distribution
+  Example: runif.acomp(n, D), where n is the number of datasets that are to be simulated and D is the number of parts
+
+Mean generates the average of a group of selected numbers 
+  Example: mean(x) where x represents the numbers to be averaged
+  
+SD generates the standard deviation of values
+  Example: sd(x, na.rm = FALSE) where x represents a number vector and na.rm is a logical check if missing values should be removed
+  
+Question 3:
+
+```{r}
+mynums <- runif(10, 0, 100)
+```
+mynums plot:
+
+```{r}
+plot(mynums)
+```
+
+
+Question 4:
+
+```{r}
+print(paste("Mean: ", mean(mynums)))
+```
+
+Question 5:
+
+```{r}
+print(paste("Standard deviation: ", sd(mynums)))
+
+```
+
+Question 6:
+
+```{r}
+print(mynums[1:10])
+```
+```{r}
+mynums < mean(mynums) + sd(mynums) & mynums > mean(mynums) - sd(mynums)
+```
+
