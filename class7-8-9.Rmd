@@ -159,3 +159,98 @@ The residuals are smaller with the new model which insinuates that it is more ac
 
 This model: sales = 0.99(sqrtTV) + 2.6724 #intercept
 It is a linear regression model that is non-linear
+
+```{r}
+dim(AdData)
+```
+
+Get the number of data points that we have
+
+```{r}
+dim(AdData)
+num_samples = dim(AdData)[1]
+num_samples
+```
+
+Set the sampling rate to 80% (or any appropriate rate)
+
+```{r}
+sampling.rate = 0.8
+```
+
+Create a training set from 80% of the available data
+
+```{r}
+# Randomly select which data points will be included in the training set
+
+training <- sample(1:num_samples, sampling.rate * num_samples, replace = FALSE)
+
+# Note that replace = FALSE to make sure that a data point is not chosen more than once
+
+# Training
+
+# Define the training set with the selected training data points 
+
+trainingSet <- subset(AdData[training, ])
+head(trainingSet)
+```
+
+The testing set is the remaining data (20%)
+
+```{r}
+# The remaining data will form the testing set
+
+testing <- setdiff(1:num_samples, training)
+
+# Define the testing set with the selected testing data points
+testingSet <- subset(AdData[testing, ])
+head(testingSet)
+```
+
+The training set has 160 datapoints and the testing set has 40 datapoints
+
+```{r}
+regModel_part2 <- lm(sales ~ . - newspaper, data = trainingSet)
+summary(regModel_part2)
+```
+
+Need to calculate the MSE. MSE = Residuals, Residuals = Actual - Prediction
+
+Do predictions for the testing set
+
+```{r}
+predictions <- predict(regModel_part2, testingSet)
+predictions
+head(testingSet)
+```
+The whole number above details which row number it is in the actual data
+The 6 decimal number is the sales prediction
+The actual number can be found in data frame (second figure above) (match the rows!)
+
+Get the prediction errors
+
+```{r}
+error = predictions - testingSet$sales
+error
+```
+
+Calculate the Mean Square Error
+
+```{r}
+mse = mean(error^2)
+mse
+```
+```{r}
+rmse = sqrt(mse)
+rmse
+```
+rmse is how we will evaluate models
+
+This is not very accurate given that the numbers are so low (e.g. Sales)
+
+
+```{r}
+#plot
+plot(testingSet$TV, testingSet$sales, pch=20, col='red')
+```
+
