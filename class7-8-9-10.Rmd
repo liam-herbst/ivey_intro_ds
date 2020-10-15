@@ -254,3 +254,119 @@ This is not very accurate given that the numbers are so low (e.g. Sales)
 plot(testingSet$TV, testingSet$sales, pch=20, col='red')
 ```
 
+```{r}
+AdData <- read.csv(("~/downloads/advertising.csv"), header = TRUE)
+num_samples = dim(AdData)[1]
+sampling.rate = 0.8
+training <- sample(1:num_samples, sampling.rate * num_samples, replace = FALSE)
+trainingSet <- subset(AdData[training, ])
+testing <- setdiff(1:num_samples, training)
+testingSet <- subset(AdData[testing, ])
+```
+
+```{r}
+library(rpart)
+```
+
+```{r}
+decTreeModel <- rpart(sales ~., data= trainingSet)
+```
+
+```{r}
+plot(decTreeModel, margin = 0.1)
+text(decTreeModel)
+```
+Leaving the tree size free leads to overfitting. Tune the size by looking at the relative error and the complexity parameter
+
+```{r}
+plotcp(decTreeModel)
+```
+
+Prune the tree at a cp = 0.03
+
+```{r}
+pruned_decTreeModel = prune(decTreeModel, cp=0.03)
+#Display pruned tree
+plot(pruned_decTreeModel, margin = 0.1)
+text(pruned_decTreeModel)
+```
+
+```{r}
+plotcp(pruned_decTreeModel)
+```
+
+Evaluate the decision tree model using the testing set
+```{r}
+# Predictions
+predictions <- predict(pruned_decTreeModel, testingSet)
+#Calculate Error
+error = predictions - testingSet$sales
+#Calculate the MSE
+mse = mean(error^2)
+mse
+rmse = sqrt(mse)
+rmse
+```
+
+plot the actual vs predicted values (for the testing set)
+
+```{r}
+plot(testingSet$TV, testingSet$sales, pch=20, col='red')
+```
+
+Random Forest
+
+Load the random forest library
+```{r}
+library(randomForest)
+```
+
+Read the data and split it
+
+```{r}
+AdData <- read.csv(("~/downloads/advertising.csv"), header = TRUE)
+num_samples = dim(AdData)[1]
+sampling.rate = 0.8
+training <- sample(1:num_samples, sampling.rate * num_samples, replace = FALSE)
+trainingSet <- subset(AdData[training, ])
+testing <- setdiff(1:num_samples, training)
+testingSet <- subset(AdData[testing, ])
+```
+
+Train a random forest using the training set data
+
+```{r}
+RandForestModel <- randomForest(sales ~., data = trainingSet)
+plot(RandForestModel)
+```
+
+You can limit the number of trees in the forest, for example, set the limit ot 200 trees
+
+```{r}
+RandForestModel<- randomForest(sales ~ ., data = trainingSet, ntree = 200)
+```
+
+Evaluate the decision tree model using the testing set
+
+```{r}
+# Perform
+predictions <- predict(RandForestModel, testingSet)
+
+#Calc Error
+error = predictions - testingSet$sales
+
+mse =  mean(error^2)
+mse
+rmse = sqrt(mse)
+rmse
+```
+
+Plot the actual points compared to the predictions
+
+```{r}
+plot(testingSet$TV, testingSet$sales, pch=20, col='red')
+points(testingSet$TV, predictions, pch=20, col='blue')
+```
+
+
+You should never create a single decision tree. You should always create a random forest.
