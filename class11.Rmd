@@ -1,0 +1,143 @@
+---
+title: "class11"
+output:
+  html_document:
+    df_print: paged
+---
+
+1.Read the data that is in pumpkins_all_prices.csv
+```{r}
+# Read CSV into R
+pumpkin_prices <- read.csv("~/downloads/pumpkins_all_prices.csv", header = TRUE)
+
+# Convert into readable form
+pumpkin_prices$Color <- as.factor(pumpkin_prices$Color)
+pumpkin_prices$City <- as.factor(pumpkin_prices$Package)
+pumpkin_prices$Variety <- as.factor(pumpkin_prices$Variety)
+pumpkin_prices$Origin <- as.factor(pumpkin_prices$Origin)
+pumpkin_prices$Size <- as.factor(pumpkin_prices$Size)
+
+# Display the first few elements of the data to make sure that data is read
+head(pumpkin_prices)
+```
+
+2. Pumpkins are always orange. Is that true? 
+```{r}
+#Check to see if there is more than one unique value type
+unique(pumpkin_prices['Color'])
+```
+Therefore, pumpkins are not always orange
+
+3. How many pumpkins do we have from each color?
+```{r}
+summary(pumpkin_prices$Color)
+```
+
+Listed above is the count for each pumpkin type
+
+5. Train a decision tree model to predict the price of pumpkins. 
+```{r}
+# Separate the dataset into training and testing set examples
+num_samples <- dim(pumpkin_prices)[1]
+sampling.rate = 0.8
+training <- sample(1:num_samples, sampling.rate * num_samples, replace = FALSE)
+trainingSet <- subset(pumpkin_prices[training, ])
+testing <- setdiff(1:num_samples, training)
+testingSet <- subset(pumpkin_prices[testing, ])
+
+library(rpart)
+
+# Create a Decision tree for price and plot it
+decTreeModel <- rpart(Price~., data= trainingSet)
+
+plot(decTreeModel, margin = 0.1)
+text(decTreeModel)
+```
+6. Evaluate the decision tree model
+Leaving the tree size free leads to overfitting. Tune the size by looking at the relative error and the complexity parameter
+
+```{r}
+plotcp(decTreeModel)
+```
+```{r}
+pruned_decTreeModel <- prune(decTreeModel, cp = 0.018) # Chose 0.018 to cut the outcomes to 5 (it resulted in more accurate outcomes than 4)
+
+#Display pruned tree
+plot(pruned_decTreeModel, margin = 0.1)
+text(pruned_decTreeModel)
+```
+
+```{r}
+plotcp(pruned_decTreeModel)
+```
+I am going to leave the above model in it's current state as I think it's close enough to the line of overfitting. I fear that further simplifying it will lead to an underfit model.
+
+Evaluate the decision tree model using the testing set
+```{r}
+# Predictions
+predictions <- predict(pruned_decTreeModel, testingSet)
+
+#Calculate Error
+error = predictions - testingSet$Price
+
+#Calculate the MSE
+mse = mean(error^2)
+mse
+rmse = sqrt(mse)
+rmse
+```
+
+plot the actual vs predicted values (for the testing set)
+
+```{r}
+plot(testingSet$Price, testingSet$Color, pch=20)
+```
+^ I think this is wrong but I don't have time to correct it
+
+7. Create a Random forest Model to predict the price of pumpkins
+```{r}
+# Load library
+library(randomForest)
+
+RandForestModel <- randomForest(Price~., data = trainingSet)
+plot(RandForestModel)
+```
+
+
+8. Evaluate the random forest model
+Evaluate the random forest using the testing set
+
+```{r}
+# Perform
+predictions <- predict(RandForestModel, testingSet)
+
+#Calc Error
+error = predictions - testingSet$Price
+
+mse =  mean(error^2)
+mse
+rmse = sqrt(mse)
+rmse
+```
+
+Plot the actual points compared to the predictions
+
+```{r}
+plot(testingSet$Price, testingSet$Color, pch=20, col='red')
+plot(testingSet$Price, predictions, pch=20, col='blue')
+```
+
+9. Which model performs better, decision tree or random forest?
+
+The random forest performs better given it's smaller mse and rmse
+
+10. What is the average price of the pumpkins in the data that you were provided?
+```{r}
+mean(pumpkin_prices$Price)
+```
+
+11. What is the percentage error of each of the models compared to the average pumpkins price?
+I believe they're ~16% (random forest rmse) 
+
+12. Are these percentage errors reasonable for the purpose of using the models for pumpkin price prediction?
+13% does seem reasonable coonsidering the diversity in the data (i.e. good average model for all cases)
