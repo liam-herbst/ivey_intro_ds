@@ -1,0 +1,92 @@
+This doesn't work and I don't know why
+
+---
+title: "Class Exercice 2"
+output: html_notebook
+---
+
+Name:  Liam Herbst
+ID:  250997176
+
+
+# A Data Scientist's favorite Spotify playlist
+
+Unhappy by Spotify's recommendation engine, Rudi is thinking of developing a model that will scrape all songs from Spotify and then identify those that he would enjoy. As a first step, Rudi has labled a set of songs ("like" column) and stored the data in spotifyMusic_labledSet.csv. Given these, he wanted to know if he could develop a model to accurately predict which of the songs that are in spotifyMusic_unlabledSet.csv he would like.
+
+
+Use K-Nearest Neighbors to predict which of the songs in spotifyMusic_unlabledSet.csv will Rudi like. 
+
+```{r}
+# Read the data into R
+m_labled <- read.csv("spotifyMusic_labledSet.csv", header = TRUE)
+m_unlabled <- read.csv("spotifyMusic_unlabledSet.csv", header = TRUE)
+# Set labled$like to factor
+m_labled$like <- as.factor(m_labled$like)
+head(m_labled)
+head(m_unlabled)
+```
+```{r}
+# Normalize all the attributes
+m_labled$acousticness = (m_labled$acousticness-mean(m_labled$acousticness))/sd(m_labled$acousticness)
+m_labled$danceability = (m_labled$danceability-mean(m_labled$danceability))/sd(m_labled$danceability)
+m_labled$energy = (m_labled$energy-mean(m_labled$energy))/sd(m_labled$energy)
+m_labled$instrumentalness = (m_labled$instrumentalness-mean(m_labled$instrumentalness))/sd(m_labled$instrumentalness)
+m_labled$liveness = (m_labled$liveness-mean(m_labled$liveness))/sd(m_labled$liveness)
+m_labled$loudness = (m_labled$loudness-mean(m_labled$loudness))/sd(m_labled$loudness)
+m_labled$speechiness = (m_labled$speechiness-mean(m_labled$speechiness))/sd(m_labled$speechiness)
+m_labled$tempo = (m_labled$tempo-mean(m_labled$tempo))/sd(m_labled$tempo)
+m_labled$valence = (m_labled$valence-mean(m_labled$valence))/sd(m_labled$valence)
+
+# Display the first 6 elements of the standardized data
+head(m_labled)
+```
+```{r}
+# Compute the K-Fold Cross Validation to Identify the best K value
+for(iter in 1:10)
+{
+# initialize a vector to store all the errors
+  AllErrors=c()
+
+  for(fold in 1:50)
+  {
+    # m_labled = training set; m_unlabled = testing set
+    
+    # Get the features of the training set
+    trainingfeatures <- subset(m_labled, select=c(-like))
+    # Get the labels of the training set
+    traininglabels <- m_labled$like
+    # Get the features of the testing set
+    testingfeatures <- subset(m_unlabled, select=c(-like))
+    
+    # Load the classification library
+    library(class)
+    # Run PRedictions
+    predictions = knn(trainingfeatures,testingfeatures,traininglabels,k=iter)
+    # Display the predictions
+    head(predictions)
+  
+    #Calculate the error
+    SizeTest=dim(m_unlabled)[1]
+    error = sum(predictions != m_unlabled$like)
+    misclassification_rate=error/SizeTest
+    AllErrors[fold] = mse
+  }
+  print(mean(AllErrors))
+}
+```
+```{r}
+# Display actual labels
+m_labled$like
+```
+
+```{r}
+# Get the number of data points in the test set
+sizeTestSet = dim(m_unlabled)[1]
+# Get the number of data points that are misclassified
+error = sum(predictedLabels != m_unlabled$like)
+# Calculate the misclassification rate
+misclassification_rate = error/sizeTestSet
+# Display the misclassification rate
+print(misclassification_rate)
+```
+I've made an error and don't have time to correct. 

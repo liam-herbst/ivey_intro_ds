@@ -1,0 +1,1245 @@
+---
+title: "class R"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*.
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+## **This is a R notebook of all code that we complete in class**
+# **It will continously be updated**
+
+
+
+
+# Exploratory Data Analysis
+
+Read the data stored in ads.csv
+```{r}
+# Read CSV into R
+OnlineAdsData <- read.csv("ads.csv", header = TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(OnlineAdsData)
+```
+
+
+
+
+
+
+
+Let's create a new variable age group (<18, 18–24, 25–34, 35–44, 45–54, 55–64, 65+). For that, first create a vector of the intervals (<18, 18–24, 25–34, 35–44, 45–54, 55–64, 65+), i.e. (-Inf,0,18,24,34,44,54,64,Inf)
+```{r}
+intervals = c(-Inf,0,18,24,34,44,54,64,Inf)
+intervals
+```
+
+
+
+
+
+
+Create a new column age_group and initilize it to 0
+```{r}
+OnlineAdsData$age_group = 0
+head(OnlineAdsData)
+```
+
+
+
+
+
+
+
+
+
+Assign to each data point, the appropriate age group
+```{r}
+OnlineAdsData$age_group <-cut(OnlineAdsData$Age,intervals)
+head(OnlineAdsData)
+```
+
+
+
+This can be done in a single line
+```{r}
+OnlineAdsData$age_group <-cut(OnlineAdsData$Age,c(-Inf,0,18,24,34,44,54,64,Inf))
+head(OnlineAdsData)
+```
+
+
+
+
+
+Transform Gender into a readable label (female, male)
+```{r}
+OnlineAdsData$Gender = factor(OnlineAdsData$Gender, levels=c(0,1), labels = c("female", "male"))
+# Display the updated data
+head(OnlineAdsData)
+```
+
+
+
+
+Display Summary Statistics
+```{r}
+summary(OnlineAdsData)
+```
+
+
+
+
+Get the data with Age=0 and look at the Gender
+
+```{r}
+DataWithAge0 <- which(OnlineAdsData$Age==0)
+SelecteDataWithAge0 <- OnlineAdsData[DataWithAge0, ]
+summary(SelecteDataWithAge0)
+```
+
+
+
+
+
+
+
+Create a histogram for the number of impressions
+```{r}
+hist(OnlineAdsData$Impressions, col="blue")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hubway Data
+
+
+```{r}
+
+# Read CSV into R
+HubWayData <- read.csv("hubway_trips_partial_data.csv", header = TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(HubWayData)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Linear Regression
+
+Read the advertising.csv data set
+
+```{r}
+# Read CSV into R
+AdData <- read.csv("advertising.csv",header=TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(AdData)
+```
+
+
+
+
+
+
+
+Besides summary statistics, doing scatter plots is a good practice to visualize the data
+
+```{r}
+# scatter plots of the data
+plot(AdData$TV, AdData$sales,pch=20,col="red")
+plot(AdData$radio, AdData$sales,pch=20,col="red")
+plot(AdData$newspaper, AdData$sales,pch=20,col="red")
+```
+
+
+
+
+
+
+
+You can also get all the possible scatter plots
+
+```{r}
+plot(AdData)
+```
+
+
+
+
+
+
+Get the correlation matrix to prepare the data for regression
+
+```{r}
+cor(AdData[ , 1:3])
+```
+
+
+
+
+
+
+
+Note that we did not include column 4 (sales) as this column is the Y
+
+You can round to two digits for clarity
+
+```{r}
+round(cor(AdData[ , 1:3]), 2)
+```
+
+
+
+
+
+
+
+Corrplot is a nice library for visualizing the correlation matrix. To install it you need to run install.packages("corrplot") (check https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)
+
+```{r}
+library("corrplot")
+corrplot(cor(AdData[,1:3]), method = "number")
+```
+
+
+
+
+
+Create a regression Model to predict sales
+
+Approach 1:
+
+```{r}
+# Create Regression Model
+regModel <- lm(AdData$sales ~ AdData$TV + AdData$radio + AdData$newspaper)
+```
+
+
+
+
+
+
+
+Approach 2:
+
+```{r}
+# Create Regression Model
+regModel <- lm(sales ~ TV + radio + newspaper, data = AdData)
+```
+
+
+
+
+
+
+Approach 3:
+
+```{r}
+# Create Regression Model
+regModel <- lm(sales ~ ., data = AdData)
+```
+
+Get summary statistics about the regression model
+
+```{r}
+summary(regModel)
+```
+
+
+
+
+
+Create a model without the newsapaper variable
+
+Approach 1:
+
+```{r}
+regModel <- lm(sales ~ TV + radio, data = AdData)
+```
+
+
+
+
+
+Approach 2:
+```{r}
+# Create Regression Model
+regModel <- lm(sales ~ . - newspaper, data = AdData)
+summary(regModel)
+```
+
+
+
+
+
+Get summary statistics about the regression model
+
+```{r}
+summary(regModel)
+```
+
+
+
+```{r}
+coef(regModel)
+```
+
+
+
+
+
+```{r}
+# Model for one variable
+regModel_TV <- lm(AdData$sales ~ AdData$TV)
+```
+
+```{r}
+summary(regModel_TV)
+```
+
+```{r}
+coef(regModel_TV)
+```
+
+
+```{r}
+#Plot data and regression equation
+coefs_TV = coef(regModel_TV)
+plot(AdData$TV, AdData$sales,pch=20,col="red")
+abline(coefs_TV[1],coefs_TV[2])
+```
+
+
+
+
+
+Use the sqrt of the TV Data
+
+```{r}
+AdData$sqrtTv <- sqrt(AdData$TV)
+head(AdData)
+```
+
+
+
+
+
+```{r}
+nonlinear_regModel <- lm(sales ~ sqrtTv, data=AdData)
+summary(nonlinear_regModel)
+```
+
+
+
+
+
+
+
+```{r}
+
+coefs_sqrtTV = coef(nonlinear_regModel)
+plot(AdData$TV, AdData$sales,pch=20,col="red")
+curve(coefs_sqrtTV[1] + coefs_sqrtTV[2] * sqrt(x), add = TRUE, col = "blue")
+```
+
+
+
+
+
+
+
+
+
+# Model Validation
+
+
+
+
+
+```{r}
+# Read CSV into R
+AdData <- read.csv("advertising.csv",header=TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(AdData)
+```
+```{r}
+dim(AdData)
+```
+
+
+
+
+
+Get the number of data points that we have
+
+```{r}
+dim(AdData)
+num_samples = dim(AdData)[1]
+num_samples
+```
+
+
+
+
+
+Set the sampling rate to 80% (or any appropriate rate)
+
+```{r}
+sampling.rate = 0.8
+```
+
+
+
+
+
+Create a training set from 80% of the available data
+
+```{r}
+# Randomly select which data points will be included in the training set
+training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+# Note that replace=FALSE to make sure that a data point is not chosen more than once
+
+#training
+# Define the training set with the selected training data points
+trainingSet <- subset(AdData[training, ])
+head(trainingSet)
+```
+
+
+
+
+
+The testing set is the remaining data
+
+```{r}
+# The remaining data will form the testing set
+testing <- setdiff(1:num_samples,training)
+
+# Define the testing set with the selected testing data points
+testingSet <- subset(AdData[testing, ])
+head(testingSet)
+```
+
+
+
+
+
+
+Create a regression using the training set
+
+```{r}
+regModel_part2 <- lm(sales ~ . - newspaper, data = trainingSet)
+summary(regModel_part2)
+```
+
+
+
+
+
+
+
+
+
+
+
+Do predictions for the testing set
+
+
+
+
+
+
+```{r}
+# Perform prdictions for the testing set
+predictions <- predict(regModel_part2, testingSet)
+predictions
+head(testingSet)
+```
+Get the prediciton errors
+
+
+
+
+
+
+
+
+
+```{r}
+error = predictions - testingSet$sales
+error
+```
+
+
+
+
+
+
+
+
+
+Calculate the Mean Square Error
+
+```{r}
+mse = mean(error^2)
+mse
+```
+```{r}
+rmse = sqrt(mse)
+rmse
+```
+
+
+
+
+
+
+
+
+
+Plot the actual vs predicted values (for the testing set)
+
+```{r}
+plot(testingSet$TV, testingSet$sales,pch=20,col="red")
+points(testingSet$TV, predictions,pch=20,col="blue")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Decision Trees
+
+Load the Decision Tree Library
+
+```{r}
+library(rpart)
+```
+
+
+
+
+
+
+
+
+
+Read the data and split into training and testing sets
+
+```{r}
+AdData <- read.csv("advertising.csv",header=TRUE)
+num_samples = dim(AdData)[1]
+sampling.rate = 0.8
+training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+trainingSet <- subset(AdData[training, ])
+testing <- setdiff(1:num_samples,training)
+testingSet <- subset(AdData[testing, ])
+```
+
+```{r}
+head(trainingSet)
+```
+
+
+
+
+
+
+
+
+Fit a decision tree to predict sales using all the other variables. Note that train the tree using the Training set data
+
+```{r}
+#Fit a decision tree model using the training data
+decTreeModel <- rpart(sales ~ .,data=trainingSet)
+```
+
+
+
+
+
+
+
+
+
+
+
+Display the tree
+
+```{r}
+plot(decTreeModel, margin=0.1)
+text(decTreeModel)
+```
+
+
+
+
+
+
+
+
+
+Leaving the tree size free leads to overfitting. Tune the size by looking at the relative error and the complexity parameter (CP)
+
+```{r}
+plotcp(decTreeModel)
+```
+
+
+
+
+
+
+
+
+Prune the tree at a cp = 0.03
+
+```{r}
+pruned_decTreeModel = prune(decTreeModel, cp=0.03)
+# Display pruned tree
+plot(pruned_decTreeModel, margin=0.1)
+text(pruned_decTreeModel)
+
+#plot(decTreeModel, margin=0.1)
+#text(decTreeModel)
+```
+
+```{r}
+plotcp(pruned_decTreeModel)
+```
+
+
+
+
+
+
+
+
+
+Evaluate the decision tree model using the testing set
+
+```{r}
+# Perform prdictions for the testing set
+predictions<-predict(pruned_decTreeModel, testingSet)
+
+# Calculate the error as the difference between the prediction and the actual
+error = predictions - testingSet$sales
+# Calcuate the MSE
+mse = mean(error^2)
+mse
+rmse=sqrt(mse)
+rmse
+```
+
+
+
+
+
+
+
+
+
+
+Plot the actual vs predicted values (for the testing set)
+
+```{r}
+plot(testingSet$TV, testingSet$sales,pch=20,col="red")
+points(testingSet$TV, predictions,pch=20,col="blue")
+```
+
+
+
+
+
+# Random Forest
+
+
+Load the random forest library
+
+```{r}
+library(randomForest)
+```
+
+
+Read the data and split into training and testing sets
+
+```{r}
+AdData <- read.csv("advertising.csv",header=TRUE)
+num_samples = dim(AdData)[1]
+sampling.rate = 0.8
+training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+trainingSet <- subset(AdData[training, ])
+testing <- setdiff(1:num_samples,training)
+testingSet <- subset(AdData[testing, ])
+```
+
+
+
+
+
+
+
+
+
+
+Train a random forest using the training set data
+
+```{r}
+RandForestModel <- randomForest(sales ~ ., data = trainingSet)
+```
+
+
+
+
+
+
+
+Plot the Error (MSE) as a function of the number of trees
+
+```{r}
+plot(RandForestModel)
+```
+
+
+
+
+
+
+You can limit the number of trees in the forest, for example set a limit of 200 trees
+
+```{r}
+RandForestModel <- randomForest(sales ~ ., data = trainingSet, ntree=200)
+```
+
+
+
+
+
+Evaluate the decision tree model using the testing set
+
+```{r}
+# Perform prdictions for the testing set
+predictions<-predict(RandForestModel, testingSet)
+
+# Calculate the error as the difference between the prediction and the actual
+error = predictions - testingSet$sales
+# Calcuate the MSE
+mse = mean(error^2)
+mse
+rmse=sqrt(mse)
+rmse
+```
+
+
+
+
+
+Plot the actual vs predicted values (for the testing set)
+
+```{r}
+plot(testingSet$TV, testingSet$sales,pch=20,col="red")
+points(testingSet$TV, predictions,pch=20,col="blue")
+```
+
+
+
+
+
+
+
+# Decision Tree for categorical variables
+
+Read the data
+
+```{r}
+# Read CSV into R
+CreditRisk <- read.csv("credit_risk.csv", header=TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(CreditRisk)
+```
+```{r}
+CreditRisk$rating <- as.factor(CreditRisk$rating)
+head(CreditRisk)
+```
+
+
+Check the rating categories
+
+```{r}
+print(CreditRisk$rating)
+```
+
+
+```{r}
+levels((CreditRisk$rating))
+```
+
+
+There are two categories H and L
+
+Create Training and Testing sets (Note that this data set is small so let us keep 90% for training)
+
+```{r}
+# Create Training and Testing Sets
+num_samples = dim(CreditRisk)[1]
+sampling.rate = 0.9
+training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+trainingSet <- CreditRisk[training, ]
+testing <- setdiff(1:num_samples,training)
+testingSet <- CreditRisk[testing, ]
+```
+
+
+
+Fit a decision tree to predict rating using all the other variables.
+
+```{r}
+library(rpart)
+#Fit a decision tree model using the training data
+decTreeModel <- rpart(rating ~ .,data=trainingSet, method = "class")
+```
+
+Display the tree
+
+```{r}
+plot(decTreeModel, margin=0.1)
+text(decTreeModel)
+```
+
+
+
+```{r}
+library(rpart.plot)
+rpart.plot(decTreeModel)
+```
+
+
+Tune the size of the tree to avoid overfitting.
+
+```{r}
+plotcp(decTreeModel)
+```
+
+
+
+Prune the tree at a cp = 0.04
+
+```{r}
+pruned_decTreeModel = prune(decTreeModel, cp=0.04)
+# Display pruned tree
+plot(pruned_decTreeModel, margin=0.1)
+text(pruned_decTreeModel)
+```
+
+
+Evaluate the decision tree model using the testing set
+
+```{r}
+# Perform prdictions for the testing set
+predictedLabels<-predict(pruned_decTreeModel, testingSet, type = "class")
+print(predictedLabels)
+```
+
+Show the true labels
+
+```{r}
+print(testingSet$rating)
+```
+
+To evaluate the model, we compute a misclassification rate (the rate of incorrect predictions). Note that in this case we do not calculate MSE since the predictions are categories and not continous values
+
+```{r}
+# Get the number of data points in the test set
+sizeTestSet = dim(testingSet)[1]
+# Get the number of data points that are misclassified
+error = sum(predictedLabels != testingSet$rating)
+# Calculate the misclassification rate
+misclassification_rate = error/sizeTestSet
+# Display the misclassification rate
+print(misclassification_rate)
+```
+
+Maybe we only care about false positives. For example I don't want someone to be classified as L if that person is H. (But I am fine if I get false negatives; ie. classify someone as H if they are actually L)
+
+```{r}
+# Get the number of data points in the test set
+sizeTestSet = dim(testingSet)[1]
+# Get the data points that are misclassified
+IsWrong = (predictedLabels != testingSet$rating)
+# Get the data points that are classified as L
+IsL = (predictedLabels == 'L')
+# Get the data points that are misclassified and are classified as L
+IsWrongAndL = (IsWrong & IsL)
+error = sum(IsWrongAndL)
+
+# Calculate the misclassification rate
+misclassification_rate = error/sizeTestSet
+# Display the misclassification rate
+print(misclassification_rate)
+```
+
+
+# Random Forest for categorical variables
+
+Load the random Forest library
+
+```{r}
+library(randomForest)
+```
+
+Read the data
+
+```{r}
+# Read CSV into R
+CreditRisk <- read.csv("credit_risk.csv", header=TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(CreditRisk)
+```
+
+
+
+```{r}
+summary(CreditRisk)
+```
+
+
+```{r}
+CreditRisk$rating <- as.factor(CreditRisk$rating)
+```
+
+
+Create Training and Testing sets (Note that this data set is small so let us keep 90% for training)
+
+```{r}
+# Create Training and Testing Sets
+num_samples = dim(CreditRisk)[1]
+sampling.rate = 0.9
+training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+trainingSet <- CreditRisk[training, ]
+testing <- setdiff(1:num_samples,training)
+testingSet <- CreditRisk[testing, ]
+```
+
+
+Train a random forest using the training set data
+
+```{r}
+RandForestModel <- randomForest(rating ~ ., data = trainingSet)
+```
+
+Plot the error as a function of the number of trees
+
+```{r}
+plot(RandForestModel)
+legend("top", colnames(RandForestModel$err.rate),fill=1:3)
+```
+
+
+```{r}
+# Perform prdictions for the testing set
+predictedLabels<-predict(RandForestModel, testingSet)
+predictedLabels
+```
+
+
+To evaluate the model, we compute a misclassification rate (the rate of incorrect predictions). Note that in this case we do not calculate MSE since the predictions are categories and not continous values
+
+```{r}
+# Get the number of data points in the test set
+sizeTestSet = dim(testingSet)[1]
+# Get the number of data points that are misclassified
+error = sum(predictedLabels != testingSet$rating)
+# Calculate the misclassification rate
+misclassification_rate = error/sizeTestSet
+# Display the misclassification rate
+print(misclassification_rate)
+```
+
+
+```{r}
+# Get the number of data points in the test set
+sizeTestSet = dim(testingSet)[1]
+# Get the data points that are misclassified
+IsWrong = (predictedLabels != testingSet$rating)
+# Get the data points that are classified as L
+IsL = (predictedLabels == 'L')
+# Get the data points that are misclassified and are classified as L
+IsWrongAndL = (IsWrong & IsL)
+error = sum(IsWrongAndL)
+
+# Calculate the misclassification rate
+misclassification_rate = error/sizeTestSet
+# Display the misclassification rate
+print(misclassification_rate)
+```
+
+
+# K-Nearest Neighbors
+
+
+Read the data
+
+```{r}
+# Read CSV into R
+CreditRisk <- read.csv("credit_risk.csv", header=TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(CreditRisk)
+```
+```{r}
+CreditRisk$rating <- as.factor(CreditRisk$rating)
+```
+
+
+Because we will use K-Nearest Neighbors model which is based on geometric distances, we need to normalize the data
+
+```{r}
+# Normalize All the Attributes
+CreditRisk$COMMEQTA = (CreditRisk$COMMEQTA-mean(CreditRisk$COMMEQTA))/sd(CreditRisk$COMMEQTA)
+CreditRisk$LLPLOANS = (CreditRisk$LLPLOANS-mean(CreditRisk$LLPLOANS))/sd(CreditRisk$LLPLOANS)
+CreditRisk$COSTTOINCOME = (CreditRisk$COSTTOINCOME-mean(CreditRisk$COSTTOINCOME))/sd(CreditRisk$COSTTOINCOME)
+CreditRisk$ROE = (CreditRisk$ROE-mean(CreditRisk$ROE))/sd(CreditRisk$ROE)
+CreditRisk$LIQASSTA = (CreditRisk$LIQASSTA-mean(CreditRisk$LIQASSTA))/sd(CreditRisk$LIQASSTA)
+CreditRisk$SIZE = (CreditRisk$SIZE-mean(CreditRisk$SIZE))/sd(CreditRisk$SIZE)
+
+# Display the first few elements of the standarized data
+head(CreditRisk)
+```
+
+Create Training and Testing sets
+
+```{r}
+# Create Training and Testing Sets
+num_samples = dim(CreditRisk)[1]
+sampling.rate = 0.8
+training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+trainingSet <- CreditRisk[training, ]
+testing <- setdiff(1:num_samples,training)
+testingSet <- CreditRisk[testing, ]
+```
+
+We would like to predict the rating of each company.
+To apply K-Nearest Neighbors, we need to separate the features from the labels (The labels are the values that we are trying to predict). This should be done for both the training and testing sets.
+
+```{r}
+# Get the features of the training set
+trainingfeatures <- subset(trainingSet, select=c(-rating))
+# Get the labels of the training set
+traininglabels <- trainingSet$rating
+# Get the features of the testing set
+testingfeatures <- subset(testingSet, select=c(-rating))
+```
+
+Note that for the testing set, we do not save the labels since these are the values that we would like to predict.
+
+Apply KNN (Note that unlike other models, we do not train the model first and then apply it later. Instead we directly give it the training set and the testing set)
+
+```{r}
+# Load the classification library
+library(class)
+# call KNN with k=3
+predictedLabels = knn(trainingfeatures,testingfeatures,traininglabels,k=3)
+```
+
+Display the predicted Labels
+
+```{r}
+head(predictedLabels)
+```
+
+The actual labels are
+
+```{r}
+head(testingSet$rating)
+```
+
+To evaluate the model, we compute a misclassification rate (the rate of incorrect predictions). Note that in this case we do not calculate MSE since the predictions are categories and not continous values
+
+```{r}
+# Get the number of data points in the test set
+sizeTestSet = dim(testingSet)[1]
+# Get the number of data points that are misclassified
+error = sum(predictedLabels != testingSet$rating)
+# Calculate the misclassification rate
+misclassification_rate = error/sizeTestSet
+# Display the misclassification rate
+print(misclassification_rate)
+```
+
+
+
+# K-Nearest Neighbors for regression
+
+
+Read the dataset
+
+```{r}
+# Read CSV into R
+AdData <- read.csv("advertising.csv",header=TRUE)
+# Display the first few elements of the data to make sure that data is read
+head(AdData)
+```
+
+
+Normalize the data features since we will be using KNN
+
+```{r}
+# Normalize All the features
+AdData$TV = (AdData$TV - mean(AdData$TV))/sd(AdData$TV)
+AdData$radio = (AdData$radio - mean(AdData$radio))/sd(AdData$radio)
+AdData$newspaper = (AdData$newspaper - mean(AdData$newspaper))/sd(AdData$newspaper)
+# Display the first few elements of the standarized data
+head(AdData)
+```
+
+
+Create Training and Testing sets
+
+```{r}
+# Create Training and Testing Sets
+num_samples = dim(AdData)[1]
+sampling.rate = 0.8
+training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+trainingSet <- subset(AdData[training, ])
+testing <- setdiff(1:num_samples,training)
+testingSet <- subset(AdData[testing, ])
+```
+
+For KNN, we need to separate the features from the labels (the variable that we want to predict)
+
+```{r}
+# Get the features of the training set
+trainingfeatures <- subset(trainingSet, select=c(-sales))
+# Get the labels of the training set
+traininglabels <- trainingSet$sales
+# Get the features of the testing set
+testingfeatures <- subset(testingSet, select=c(-sales))
+```
+
+Apply Knn.reg (Note that since the values that we want to predict are continous we apply knn.reg and knn which is used when we want to predict categories)
+
+```{r}
+# Load the KNN Regression library
+library(FNN)
+# call KNN Regression with k=3
+predictions = knn.reg(trainingfeatures,testingfeatures,traininglabels,k=3)
+```
+
+
+```{r}
+predictions$pred
+```
+
+
+Calculate the MSE
+
+```{r}
+# Calculate the error as the difference between the prediction and the actual
+error = predictions$pred - testingSet$sales
+# Calcuate the MSE
+mse = mean(error^2)
+mse
+rmse= sqrt(mse)
+rmse
+```
+
+Plot actual vs predicted
+
+```{r}
+#Plot actual vs predicted
+plot(testingSet$TV, testingSet$sales,pch=20,col="red")
+points(testingSet$TV, predictions$pred,pch=20,col="blue")
+```
+
+
+
+
+# K-Fold Cross Validation
+
+Let us do a 50-Fold Cross Validation (Average error over 50 different test sets)
+
+
+```{r}
+for(iter in 1:10)
+{
+#initialize a vectore to store all the errors
+AllErrors=c()
+
+for(fold in 1:200)
+{
+  #Get Training at Testing sets
+  training <- sample(1:num_samples, sampling.rate * num_samples, replace=FALSE)
+  trainingSet <- subset(AdData[training, ])
+  testing <- setdiff(1:num_samples,training)
+  testingSet <- subset(AdData[testing, ])
+
+  # Get the features of the training set
+  trainingfeatures <- subset(trainingSet, select=c(-sales))
+  # Get the labels of the training set
+  traininglabels <- trainingSet$sales
+  # Get the features of the testing set
+  testingfeatures <- subset(testingSet, select=c(-sales))
+
+
+  #Calculate the error
+  predictions = knn.reg(trainingfeatures,testingfeatures,traininglabels,k=iter)
+  error = predictions$pred - testingSet$sales
+  mse = mean(error^2)
+  rmse = sqrt(mse)
+  AllErrors[fold] = rmse
+}
+print(mean(AllErrors))
+}
+```
+
+```{r}
+AverageError = mean(AllErrors)
+AverageError
+```
+
+
+
+
